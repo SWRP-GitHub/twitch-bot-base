@@ -18,11 +18,13 @@ USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
 TARGET_CHANNEL = f'{config.get("client_info","targetChannel")}'
 
 # this will be called when the event READY is triggered, which will be on bot start
+
+
 async def on_ready(ready_event: EventData):
     print(' | Super_lil_Bot is ready for work, joining channels')
     await ready_event.chat.join_room(TARGET_CHANNEL)
     print(f"Joined {TARGET_CHANNEL}'s chat. ")
-    await ready_event.chat.send_message(room=TARGET_CHANNEL,text='Hello, I am Online and ready to take Commands from Chat!')
+    await ready_event.chat.send_message(room=TARGET_CHANNEL, text='Hello, I am Online and ready to take Commands from Chat!')
 
 
 # this will be called whenever a message in a channel was send by either the bot OR another user
@@ -44,14 +46,35 @@ async def test_command(cmd: ChatCommand):
     else:
         await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
 
+# TESTING BINGO BASE COMMANDS
 
+
+async def bingo_command(cmd: ChatCommand):
+    try:
+        userInput = int(cmd.parameter)
+    except ValueError:
+        print(
+            f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer')
+        await cmd.reply(f'Selected value not an number {cmd.user.name}!')
+    else:
+        if userInput not in range(0, 499):
+            print(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an in specified range')
+            await cmd.reply(f'Selected number not within range! Must be between 1 and 500! {cmd.user.name}!')
+        else:
+            print(f'{cmd.user.name} submitted {cmd.parameter} as their number')
+            await cmd.reply(f'{cmd.user.name} submitted {cmd.parameter} as their number in bingo!')
+    finally:
+        print('finishing selection')
 # this is where we set up the bot
+
+
 async def run():
     # set up twitch api instance and add user authentication with some scopes
     twitch = await Twitch(APP_ID, APP_SECRET)
     auth = UserAuthenticator(twitch, USER_SCOPE)
     token, refresh_token = await auth.authenticate()
     await twitch.set_user_authentication(token, USER_SCOPE, refresh_token)
+    
     # create chat instance
     chat = await Chat(twitch)
 
@@ -66,6 +89,7 @@ async def run():
 
     #   you can directly register commands and their handlers, this will register the !reply command
     chat.register_command('reply', test_command)
+    chat.register_command('bingo', bingo_command)
 
     # we are done with our setup, lets start this bot up!
     chat.start()
