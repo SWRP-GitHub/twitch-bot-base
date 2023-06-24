@@ -4,11 +4,15 @@ from twitchAPI.types import AuthScope, ChatEvent
 from twitchAPI.chat import Chat, EventData, ChatMessage, ChatSub, ChatCommand
 import asyncio
 import configparser
-
+import random
+import json
 # Config loading
 path = "config.ini"
 config = configparser.ConfigParser()
 config.read(path)
+
+#Bingo Arry
+bingoArry = []
 
 # Build credentials based on config.ini
 # Requires OAuth and RedirectURL to be 'http://localhost:17563' in the application settings.
@@ -18,8 +22,6 @@ USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
 TARGET_CHANNEL = f'{config.get("client_info","targetChannel")}'
 
 # this will be called when the event READY is triggered, which will be on bot start
-
-
 async def on_ready(ready_event: EventData):
     print(' | Super_lil_Bot is ready for work, joining channels')
     await ready_event.chat.join_room(TARGET_CHANNEL)
@@ -47,27 +49,36 @@ async def test_command(cmd: ChatCommand):
         await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
 
 # TESTING BINGO BASE COMMANDS
-
-
 async def bingo_command(cmd: ChatCommand):
     try:
         userInput = int(cmd.parameter)
     except ValueError:
-        print(
-            f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer')
+        print(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer')
         await cmd.reply(f'Selected value not an number {cmd.user.name}!')
     else:
-        if userInput not in range(0, 499):
+        if userInput not in range(1, 501):
             print(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an in specified range')
             await cmd.reply(f'Selected number not within range! Must be between 1 and 500! {cmd.user.name}!')
         else:
+            playerRecord = "{'User':" + f'{cmd.user.name}' + ", 'number':" + f'{cmd.parameter}'+'}'
+            print(playerRecord)
             print(f'{cmd.user.name} submitted {cmd.parameter} as their number')
             await cmd.reply(f'{cmd.user.name} submitted {cmd.parameter} as their number in bingo!')
+            bingoArry.append(playerRecord)
+            jsonArry = json.loads(str(bingoArry))
+            print(json.dumps(bingoArry))
     finally:
         print('finishing selection')
+
+# Bingo winner and clear Array
+async def bingo_winner_command(cmd: ChatCommand):
+    if (cmd.parameter == 'winner' & cmd.user.name=='theSpaceVixen'):
+        randInt = random.randint(1,501)
+        print(f'Winner is {bingoArry[randInt]}')
+
+
+
 # this is where we set up the bot
-
-
 async def run():
     # set up twitch api instance and add user authentication with some scopes
     twitch = await Twitch(APP_ID, APP_SECRET)
@@ -89,7 +100,7 @@ async def run():
 
     #   you can directly register commands and their handlers, this will register the !reply command
     chat.register_command('reply', test_command)
-    chat.register_command('bingo', bingo_command)
+    chat.register_command('bingoChoose', bingo_command)
 
     # we are done with our setup, lets start this bot up!
     chat.start()
