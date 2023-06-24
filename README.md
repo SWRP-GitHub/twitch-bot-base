@@ -11,7 +11,7 @@ Code is modified to obfuscate Bot credentials.
 - Clone the repo to you computer
 - Ensure you have Python installed (https://www.python.org/downloads/)
 - Install the libraries above with pip
-- Create a bot account with twitch with 2FA enabled (make the username what you want your bot named)
+- Create a bot account with twitch with 2FA enabled (make the username what you want your bot to be called)
 - Ensure you have an Application created over at https://dev.twitch.tv/console
     - Redirect URL must be http://localhost:17563
     - Put the Client ID and Client Secret in the config file once its created (unquoted, the bot converts it to a string)
