@@ -11,8 +11,8 @@ path = "config.ini"
 config = configparser.ConfigParser()
 config.read(path)
 
-#Bingo Arry
-bingoArry = ["{'user':'Begin_Bingo_List','number':0}"]
+# Bingo Arry
+bingoArry = ['{"user":"bingo_Start_User","number":"0"}']
 bingoToggle = [0]
 # Build credentials based on config.ini
 # Requires OAuth and RedirectURL to be 'http://localhost:17563' in the application settings.
@@ -22,6 +22,8 @@ USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
 TARGET_CHANNEL = f'{config.get("client_info","targetChannel")}'
 
 # this will be called when the event READY is triggered, which will be on bot start
+
+
 async def on_ready(ready_event: EventData):
     print(' | Super_lil_Bot is ready for work, joining channels')
     await ready_event.chat.join_room(TARGET_CHANNEL)
@@ -50,18 +52,24 @@ async def test_command(cmd: ChatCommand):
 
 # TESTING BINGO BASE COMMANDS
 
-#bingoStart Command
+# bingoStart Command
+
+
 async def bingo_start(cmd: ChatCommand):
     bingoToggle.clear()
     bingoToggle.append(1)
     print(f'Bingo Game started!')
     await cmd.send(f'Bingo Started! "!bingoChoose NUMBER" to pick a number for bingo!')
+# bingoStop
+
 
 async def bingo_stop(cmd: ChatCommand):
     bingoToggle.clear()
     bingoToggle.append(0)
     print(f'Bingo Game stopped!')
     await cmd.send(f'Bingo has Ended, Pending final results!')
+# bingoStatus
+
 
 async def bingo_current(cmd: ChatCommand):
     if bingoToggle == [1]:
@@ -69,7 +77,9 @@ async def bingo_current(cmd: ChatCommand):
     else:
         print('No game is running! Start one with !bingoStart!')
 
-#bingoChoose Command
+# bingoChoose Command
+
+
 async def bingo_command(cmd: ChatCommand):
     try:
         if bingoToggle == [0]:
@@ -84,22 +94,33 @@ async def bingo_command(cmd: ChatCommand):
             print(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an in specified range')
             await cmd.reply(f'Selected number not within range! Must be between 1 and 500! {cmd.user.name}!')
         else:
-            playerRecord = "{'User':" + f'{cmd.user.name}' + ", 'number':" + f'{cmd.parameter}'+'}'
-            print(playerRecord)
-            print(f'{cmd.user.name} submitted {cmd.parameter} as their number')
-            await cmd.reply(f'{cmd.user.name} submitted {cmd.parameter} as their number in bingo!')
-            bingoArry.append(playerRecord)
-            jsonArry = json.loads(str(bingoArry))
-            print(json.dumps(bingoArry))
+            playerRecord = str("{"+'"user":'+'"'+f'{str(cmd.user.name)}'+'"'+","+'"number":'+'"'f'{cmd.parameter}'+'"'+"}")
+            jsonPlayRecord = json.loads(playerRecord)
+            #print(jsonPlayRecord)
+            for i in bingoArry:
+                jsonArry = json.loads(i)
+                if jsonPlayRecord["user"] in jsonArry["user"]:
+                    print('user record exists, skipping')
+                    break
+                if jsonPlayRecord["number"] in jsonArry["number"]:
+                    print('number record exists, skipping')
+                    break
+                else:
+                    print(f'{cmd.user.name} submitted {cmd.parameter} as their number')
+                    await cmd.reply(f'{cmd.user.name} submitted {cmd.parameter} as their number in bingo!')
+                    bingoArry.append(playerRecord)
+                    print(bingoArry)
+            # jsonResult = json.loads(bingoArry[0])
+            # print(jsonResult["user"])
     finally:
         print('finishing selection')
-
 # Bingo winner and clear Array
-async def bingo_winner_command(cmd: ChatCommand):
-    if (cmd.parameter == 'winner' & cmd.user.name=='theSpaceVixen'):
-        randInt = random.randint(1,501)
-        print(f'Winner is {bingoArry[randInt]}')
 
+
+async def bingo_winner_command(cmd: ChatCommand):
+    if (cmd.parameter == 'winner' & cmd.user.name == 'theSpaceVixen'):
+        randInt = random.randint(1, 501)
+        print(f'Winner is {bingoArry[randInt]}')
 
 
 # this is where we set up the bot
@@ -109,7 +130,7 @@ async def run():
     auth = UserAuthenticator(twitch, USER_SCOPE)
     token, refresh_token = await auth.authenticate()
     await twitch.set_user_authentication(token, USER_SCOPE, refresh_token)
-    
+
     # create chat instance
     chat = await Chat(twitch)
 
