@@ -12,8 +12,8 @@ config = configparser.ConfigParser()
 config.read(path)
 
 #Bingo Arry
-bingoArry = []
-
+bingoArry = ["{'user':'Begin_Bingo_List','number':0}"]
+bingoToggle = [0]
 # Build credentials based on config.ini
 # Requires OAuth and RedirectURL to be 'http://localhost:17563' in the application settings.
 APP_ID = f'{config.get("client_info","clientID")}'
@@ -49,9 +49,33 @@ async def test_command(cmd: ChatCommand):
         await cmd.reply(f'{cmd.user.name}: {cmd.parameter}')
 
 # TESTING BINGO BASE COMMANDS
+
+#bingoStart Command
+async def bingo_start(cmd: ChatCommand):
+    bingoToggle.clear()
+    bingoToggle.append(1)
+    print(f'Bingo Game started!')
+    await cmd.send(f'Bingo Started! "!bingoChoose NUMBER" to pick a number for bingo!')
+
+async def bingo_stop(cmd: ChatCommand):
+    bingoToggle.clear()
+    bingoToggle.append(0)
+    print(f'Bingo Game stopped!')
+    await cmd.send(f'Bingo has Ended, Pending final results!')
+
+async def bingo_current(cmd: ChatCommand):
+    if bingoToggle == [1]:
+        print('There is a gaming currently going on!')
+    else:
+        print('No game is running! Start one with !bingoStart!')
+
+#bingoChoose Command
 async def bingo_command(cmd: ChatCommand):
     try:
-        userInput = int(cmd.parameter)
+        if bingoToggle == [0]:
+            print('Bingo is not started! Run /bingStart to start the bingo!')
+        else:
+            userInput = int(cmd.parameter)
     except ValueError:
         print(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer')
         await cmd.reply(f'Selected value not an number {cmd.user.name}!')
@@ -101,7 +125,9 @@ async def run():
     #   you can directly register commands and their handlers, this will register the !reply command
     chat.register_command('reply', test_command)
     chat.register_command('bingoChoose', bingo_command)
-
+    chat.register_command('bingoStart', bingo_start)
+    chat.register_command('bingoStop', bingo_stop)
+    chat.register_command('bingoStatus', bingo_current)
     # we are done with our setup, lets start this bot up!
     chat.start()
 
