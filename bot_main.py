@@ -6,12 +6,16 @@ import asyncio
 import configparser
 import random
 import json
+import os
+from termcolor import colored
+os.system('color')
 path = "config.ini"
 config = configparser.ConfigParser()
 config.read(path)
-jsonStartUser = '{"user":"bingo_Start_User","number":"0"}'
+# jsonStartUser = '{"user":"bingo_Start_User","number":"0"}'
 bingoArry = []
 bingoToggle = [0]
+chatLogging = [0]
 APP_ID = f'{config.get("client_info","clientID")}'
 APP_SECRET = f'{config.get("client_info","clientSecret")}'
 USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
@@ -20,15 +24,40 @@ TARGET_CHANNEL = f'{config.get("client_info","targetChannel")}'
 
 
 async def on_ready(ready_event: EventData):
-    print(' | Super_lil_Bot is ready for work, joining channels')
+    print(colored(' | Super_lil_Bot is ready for work, joining channels','red'))
     await ready_event.chat.join_room(TARGET_CHANNEL)
     print(f"Joined {TARGET_CHANNEL}'s chat. ")
+    print('==============================================================')
     await ready_event.chat.send_message(room=TARGET_CHANNEL, text='Hello, I am Online and ready to take Commands from Chat!')
 # this will be called whenever a message in a channel was send by either the bot OR another user
 
 
 async def on_message(msg: ChatMessage):
-    print(f'{msg.user.name} said: {msg.text}')
+    if chatLogging == [0]:
+        print(colored('Chat Logging is Disabled, type !cl to toggle it.','red'))
+    else:
+        print(colored(f'{msg.user.name}','red') + colored(f' said: {msg.text}','yellow'))
+        splitMessage = msg.text.split()
+        convertedToLower = []
+        for i in splitMessage:
+            convertedToLower.append(i.lower())
+        if "pog" in convertedToLower:
+            await msg.chat.send_message(room=f'{TARGET_CHANNEL}',text="POG DETECTED")
+            print('S_L_B: Pog Detected')
+            print('==============================================================')
+        else:
+            print('S_L_B: no pog in last message')
+            print('==============================================================')
+
+async def chatToggle(cmd: ChatCommand):
+    if chatLogging == [0]:
+        chatLogging.clear()
+        chatLogging.append(1)
+    else:
+        chatLogging.clear()
+        chatLogging.append(0)
+
+
 # this will be called whenever someone subscribes to a channel
 
 
@@ -53,11 +82,13 @@ async def bingo_start(cmd: ChatCommand):
         bingoToggle.clear()
         bingoToggle.append(1)
         bingoArry.clear()
-        bingoArry.append(jsonStartUser)
-        print(f'Bingo Game started!')
+        # bingoArry.append(jsonStartUser)
+        print(colored(f'Bingo Game started!',"green"))
         await cmd.send(f'Bingo Started! "!bingoChoose NUMBER" to pick a number for bingo!')
+        print('==============================================================')
     else:
-        cmd.reply('You are not authorized to do this command.')
+        await cmd.reply(colored('You are not authorized to do this command.','red'))
+        print('==============================================================')
 # bingoStop
 
 
@@ -65,71 +96,78 @@ async def bingo_stop(cmd: ChatCommand):
     if cmd.user.name == 'super_lil_fist':
         bingoToggle.clear()
         bingoToggle.append(0)
-        print(f'Bingo Game stopped!')
+        print(colored(f'Bingo Game stopped!','red'))
         await cmd.send(f'Bingo has Ended, Pending final results!')
+        print('==============================================================')
     else:
-        cmd.reply('You are not authorized to do this command.')
+        await cmd.reply('You are not authorized to do this command.')
+        print('==============================================================')
 # bingoStatus
 
 
 async def bingo_current(cmd: ChatCommand):
     if bingoToggle == [1]:
-        print('There is a gaming currently going on!')
+        print(colored('There is a gaming currently going on!','red'))
+        print('==============================================================')
     else:
-        print('No game is running! Start one with !bingoStart!')
+        print(colored('No game is running! Start one with !bingoStart!','green'))
+        print('==============================================================')
 # bingoChoose Command
 
 
 async def bingo_command(cmd: ChatCommand):
     try:
         if bingoToggle == [0]:
-            print('Bingo is not started! Run /bingoStart to start the bingo!')
+            print(colored('Bingo is not started! Run /bingoStart to start the bingo!','green'))
+            print('==============================================================')
         else:
             userInput = int(cmd.parameter)
     except ValueError:
-        print(
-            f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer')
+        print(colored(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an integer','red'))
         await cmd.reply(f'Selected value not an number {cmd.user.name}!')
+        print('==============================================================')
     else:
         if userInput not in range(1, 501):
-            print(
-                f'{cmd.user.name} submitted value {cmd.parameter} and it was not an in specified range')
+            print(colored(f'{cmd.user.name} submitted value {cmd.parameter} and it was not an in specified range','red'))
             await cmd.reply(f'Selected number not within range! Must be between 1 and 500! {cmd.user.name}!')
+            print('==============================================================')
         else:
-            playerRecord = str("{"+'"user":'+'"'+f'{str(cmd.user.name)}' +
-                               '"'+","+'"number":'+'"'f'{cmd.parameter}'+'"'+"}")
+            playerRecord = str("{"+'"user":'+'"'+f'{str(cmd.user.name)}' + '"'+","+'"number":'+'"'f'{cmd.parameter}'+'"'+"}")
             jsonPlayRecord = json.loads(playerRecord)
             for i in bingoArry:
                 jsonArry = json.loads(i)
                 if jsonPlayRecord["user"] in jsonArry["user"]:
-                    print('user present in array, aborting')
+                    print(colored('user present in array, aborting','red'))
                     await cmd.reply('You have already selected a number! Wait for a new round to begin!')
+                    print('==============================================================')
                     break
                 if jsonPlayRecord["number"] in jsonArry["number"]:
-                    print('number present in array, aborting')
+                    print(colored('number present in array, aborting','red'))
                     await cmd.reply('Number selected by another user, try again!')
+                    print('==============================================================')
                     break
             else:
-                print(f'{cmd.user.name} submitted {cmd.parameter} as their number')
+                print(colored(f'{cmd.user.name} submitted {cmd.parameter} as their number','green'))
                 await cmd.send(f'{cmd.user.name} submitted {cmd.parameter} as their number in bingo!')
                 bingoArry.append(playerRecord)
-    finally:
-        print('finishing selection')
-        print(bingoArry)
+                print('==============================================================')
+    finally: pass
 # Bingo winner and clear Array
 
 
 async def bingo_winner_command(cmd: ChatCommand):
     if cmd.user.name == 'super_lil_fist':
-        randInt = random.randint(1, len(bingoArry))
-        print(f'Array Length = {len(bingoArry)}')
-        jsonWinner = json.loads(bingoArry[randInt])
-        print(
-            f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}')
+        bingoLen = len(bingoArry)
+        bingoLenAdj = (bingoLen - 1) ##Adjustment needed to pull records from JSON array.
+        randInt = random.randint(0, bingoLenAdj)
+        # print(f'Array Length = {bingoLenAdj}')
+        jsonWinner = json.loads(bingoArry[(randInt)])
+        print(f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}')
         await cmd.send(f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}!')
+        print('==============================================================')
         bingoArry.clear()
     else:
-        cmd.reply('You are not Authorized to do this command.')
+        await cmd.reply('You are not Authorized to do this command.')
 # this is where we set up the bot
 
 
@@ -148,6 +186,7 @@ async def run():
     chat.register_command('bingoStop', bingo_stop)
     chat.register_command('bingoStatus', bingo_current)
     chat.register_command('bingoWinner', bingo_winner_command)
+    chat.register_command('cl', chatToggle)
     chat.start()
     try:
         input('press ENTER to end the bot')
