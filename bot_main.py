@@ -34,7 +34,8 @@ async def on_ready(ready_event: EventData):
 
 async def on_message(msg: ChatMessage):
     if chatLogging == [0]:
-        print(colored('Chat Logging is Disabled, type !cl to toggle it.','red'))
+        pass
+        #print(colored('Chat Logging is Disabled, type !cl to toggle it.','red'))
     else:
         print(colored(f'{msg.user.name}','red') + colored(f' said: {msg.text}','yellow'))
         splitMessage = msg.text.split()
@@ -46,7 +47,7 @@ async def on_message(msg: ChatMessage):
             print('S_L_B: Pog Detected')
             print('==============================================================')
         else:
-            print('S_L_B: no pog in last message')
+            #print('S_L_B: no pog in last message')
             print('==============================================================')
 
 async def chatToggle(cmd: ChatCommand):
@@ -136,12 +137,12 @@ async def bingo_command(cmd: ChatCommand):
             jsonPlayRecord = json.loads(playerRecord)
             for i in bingoArry:
                 jsonArry = json.loads(i)
-                if jsonPlayRecord["user"] in jsonArry["user"]:
+                if jsonPlayRecord["user"] == jsonArry["user"]:
                     print(colored('user present in array, aborting','red'))
                     await cmd.reply('You have already selected a number! Wait for a new round to begin!')
                     print('==============================================================')
                     break
-                if jsonPlayRecord["number"] in jsonArry["number"]:
+                if jsonPlayRecord["number"] == jsonArry["number"]:
                     print(colored('number present in array, aborting','red'))
                     await cmd.reply('Number selected by another user, try again!')
                     print('==============================================================')
@@ -162,7 +163,7 @@ async def bingo_winner_command(cmd: ChatCommand):
         randInt = random.randint(0, bingoLenAdj)
         # print(f'Array Length = {bingoLenAdj}')
         jsonWinner = json.loads(bingoArry[(randInt)])
-        print(f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}')
+        print(colored(f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}','green'))
         await cmd.send(f'Winner is {jsonWinner["user"]} with number {jsonWinner["number"]}!')
         print('==============================================================')
         bingoArry.clear()
