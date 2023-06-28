@@ -27,3 +27,10 @@ Code is modified to obfuscate Bot credentials.
 - Comes with an example !reply chat command
 - Obfuscated credentials and automatic token refresh on starting the bot
 - Plenty of room for modification and more features
+
+## Bingo Features
+- **!bingoStatus** to check game status
+- **!bingoStart** to start bingo game
+- **!bingoChoose NUMBER** to choose number
+- **!bingoStop** to stope game
+- **!bingoWinner** to choose winner
