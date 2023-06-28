@@ -23,7 +23,7 @@ Code is modified to obfuscate Bot credentials.
 - Once authorized it will then join the chat room and listen for events and commands
 
 ## Features
-- Listens to chat and logs it to the bots console
+- Listens to chat and logs it to the bots console with command !cl
 - Comes with an example !reply chat command
 - Obfuscated credentials and automatic token refresh on starting the bot
 - Plenty of room for modification and more features
@@ -34,3 +34,10 @@ Code is modified to obfuscate Bot credentials.
 - **!bingoChoose NUMBER** to choose number
 - **!bingoStop** to stope game
 - **!bingoWinner** to choose winner
+- Should be ready to go out of box.
+
+## Bingo Command Order for a game:
+- 1. run bingo start
+- 2. then choose numbers with bingo choose
+- 3. run bingo stop
+- 4. then finally run bingo winner.
