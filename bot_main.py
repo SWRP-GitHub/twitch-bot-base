@@ -1,3 +1,4 @@
+from enum import Enum
 from twitchAPI import Twitch
 from twitchAPI.oauth import UserAuthenticator
 from twitchAPI.types import AuthScope, ChatEvent
@@ -21,8 +22,12 @@ APP_SECRET = f'{config.get("client_info","clientSecret")}'
 USER_SCOPE = [AuthScope.CHAT_READ, AuthScope.CHAT_EDIT]
 TARGET_CHANNEL = f'{config.get("client_info","targetChannel")}'
 # this will be called when the event READY is triggered, which will be on bot start
-
-
+# Admin Users
+class authorizedUsers(Enum):
+    super_lil_fist = 1
+    theSpaceVixen = 2
+    stingraynine = 3
+# list(authorizedUsers)
 async def on_ready(ready_event: EventData):
     print(colored(' | Super_lil_Bot is ready for work, joining channels','red'))
     await ready_event.chat.join_room(TARGET_CHANNEL)
@@ -79,7 +84,7 @@ async def test_command(cmd: ChatCommand):
 ### NOTES: Need to build a better detection system for bingoToggle and bingoArry.
 
 async def bingo_start(cmd: ChatCommand):
-    if cmd.user.name == 'super_lil_fist':
+    if cmd.user.name == authorizedUsers.super_lil_fist.name:
         bingoToggle.clear()
         bingoToggle.append(1)
         bingoArry.clear()
@@ -94,7 +99,7 @@ async def bingo_start(cmd: ChatCommand):
 
 
 async def bingo_stop(cmd: ChatCommand):
-    if cmd.user.name == 'super_lil_fist':
+    if cmd.user.name == authorizedUsers.super_lil_fist.name:
         bingoToggle.clear()
         bingoToggle.append(0)
         print(colored(f'Bingo Game stopped!','red'))
@@ -157,7 +162,7 @@ async def bingo_command(cmd: ChatCommand):
 
 
 async def bingo_winner_command(cmd: ChatCommand):
-    if cmd.user.name == 'super_lil_fist':
+    if cmd.user.name == authorizedUsers.super_lil_fist.name:
         bingoLen = len(bingoArry)
         bingoLenAdj = (bingoLen - 1) ##Adjustment needed to pull records from JSON array.
         randInt = random.randint(0, bingoLenAdj)
